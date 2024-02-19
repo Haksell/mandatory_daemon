@@ -99,7 +99,6 @@ static void handleSIGCHLD(int sig) {
 }
 
 static void setupSignalHandlers() {
-	// TODO: try 1/0, stack overflow and stuff like that
 	signal(SIGHUP, handleRemainingSignals);
 	signal(SIGINT, handleRemainingSignals);
 	signal(SIGQUIT, handleSIGQUIT);
@@ -146,10 +145,6 @@ static void daemonize() {
 	createLockFile(LOCK_FILE);
 	createPidFile(PID_FILE);
 	setupSignalHandlers();
-	/*************************************/
-	int x = 1 / umask(0);
-	std::cout << x << std::endl;
-	/*************************************/
 }
 
 static void loop() {
