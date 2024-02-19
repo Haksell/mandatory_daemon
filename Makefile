@@ -15,7 +15,7 @@ clean:
 	rm -f *.o
 
 kill:
-	sudo pkill -f $(NAME)
+	sudo pkill -9 $(NAME) || true
 	sudo rm -f /run/matt_daemon.lock
 	sudo rm -f /run/matt_daemon.pid
 
@@ -27,4 +27,18 @@ re: fclean all
 run:
 	$(MAKE) all --no-print-directory
 	sudo ./$(NAME)
-	$(MAKE) fclean --no-print-directory
+	$(MAKE) clean --no-print-directory
+
+rerun: fclean run
+
+info:
+	@ps aux | grep '[M]att_daemon' || true
+	@ls -lah /run | grep matt_daemon || true
+
+logs_full:
+	@sudo tail -f /var/log/syslog
+
+logs_matt:
+	@sudo tail -f /var/log/syslog | grep 'Matt_daemon'
+
+.PHONY: all clean kill fclean re run info logs

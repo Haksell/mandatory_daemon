@@ -17,19 +17,14 @@
 #include <sys/wait.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <unordered_map>
 #include <vector>
 
 #define DAEMON_NAME "Matt_daemon"
-#define SLEEP_INTERVAL 5000
+#define SLEEP_INTERVAL 1000000
 
 #define LOCK_FILE "/run/matt_daemon.lock"
 #define PID_FILE "/run/matt_daemon.pid"
-
-static void handleSigchld(int sig) {
-	(void)sig;
-	while (waitpid(-1, NULL, WNOHANG) > 0) {
-	}
-}
 
 static void panic(const char* format, ...) {
 	va_list args;
@@ -66,6 +61,75 @@ static int createPidFile(const char* filename) {
 	return fd;
 }
 
+static void logSignal(int sig) {
+	static const std::unordered_map<int, std::string> signalNames = {
+		{SIGHUP, "SIGHUP"},	  {SIGINT, "SIGINT"},	  {SIGQUIT, "SIGQUIT"},
+		{SIGILL, "SIGILL"},	  {SIGTRAP, "SIGTRAP"},	  {SIGABRT, "SIGABRT"},
+		{SIGFPE, "SIGBUS"},	  {SIGFPE, "SIGFPE"},	  {SIGUSR1, "SIGUSR1"},
+		{SIGSEGV, "SIGSEGV"}, {SIGUSR2, "SIGUSR2"},	  {SIGPIPE, "SIGPIPE"},
+		{SIGALRM, "SIGALRM"}, {SIGTERM, "SIGTERM"},	  {SIGCHLD, "SIGCHLD"},
+		{SIGCONT, "SIGCONT"}, {SIGSTOP, "SIGSTOP"},	  {SIGTSTP, "SIGTSTP"},
+		{SIGTTIN, "SIGTTIN"}, {SIGTTOU, "SIGTTOU"},	  {SIGURG, "SIGURG"},
+		{SIGXCPU, "SIGXCPU"}, {SIGXFSZ, "SIGXFSZ"},	  {SIGVTALRM, "SIGVTALRM"},
+		{SIGPROF, "SIGPROF"}, {SIGWINCH, "SIGWINCH"}, {SIGIO, "SIGIO"},
+		{SIGPWR, "SIGPWR"},
+
+	};
+	auto it = signalNames.find(sig);
+	syslog(LOG_NOTICE, "Received signal %d (%s)", sig,
+		   it == signalNames.end() ? "UNKNOWN" : it->second.c_str());
+}
+
+static void handleRemainingSignals(int sig) {
+	logSignal(sig);
+	syslog(LOG_NOTICE, "Stopping " DAEMON_NAME);
+	std::exit(EXIT_SUCCESS);
+}
+
+static void handleSIGQUIT(int sig) {
+	logSignal(sig);
+	signal(sig, SIG_DFL);
+	raise(sig);
+}
+
+static void handleSIGCHLD(int sig) {
+	logSignal(sig);
+	while (waitpid(-1, NULL, WNOHANG) > 0) {
+	}
+}
+
+static void setupSignalHandlers() {
+	// TODO: try 1/0, stack overflow and stuff like that
+	signal(SIGHUP, handleRemainingSignals);
+	signal(SIGINT, handleRemainingSignals);
+	signal(SIGQUIT, handleSIGQUIT);
+	signal(SIGILL, handleRemainingSignals);
+	signal(SIGTRAP, handleRemainingSignals);
+	signal(SIGABRT, handleRemainingSignals);
+	signal(SIGBUS, handleRemainingSignals);
+	signal(SIGFPE, handleRemainingSignals);
+	signal(SIGUSR1, handleRemainingSignals);
+	signal(SIGSEGV, handleRemainingSignals);
+	signal(SIGUSR2, handleRemainingSignals);
+	signal(SIGPIPE, handleRemainingSignals);
+	signal(SIGALRM, handleRemainingSignals);
+	signal(SIGTERM, handleRemainingSignals);
+	signal(SIGCHLD, handleSIGCHLD);
+	signal(SIGCONT, handleRemainingSignals);
+	signal(SIGSTOP, handleRemainingSignals);
+	signal(SIGTSTP, SIG_IGN);
+	signal(SIGTTIN, SIG_IGN);
+	signal(SIGTTOU, SIG_IGN);
+	signal(SIGURG, handleRemainingSignals);
+	signal(SIGXCPU, handleRemainingSignals);
+	signal(SIGXFSZ, handleRemainingSignals);
+	signal(SIGVTALRM, handleRemainingSignals);
+	signal(SIGPROF, handleRemainingSignals);
+	signal(SIGWINCH, SIG_IGN);
+	signal(SIGIO, handleRemainingSignals);
+	signal(SIGPWR, handleRemainingSignals);
+}
+
 static void daemonize() {
 	becomeChild();
 	if (setsid() < 0) panic("setsid() failed");
@@ -74,10 +138,6 @@ static void daemonize() {
 	syslog(LOG_NOTICE, "Successfully started " DAEMON_NAME);
 	umask(0);
 	if (chdir("/") < 0) panic("Failed to change directory to /");
-	signal(SIGCHLD, handleSigchld);
-	signal(SIGTTIN, SIG_IGN);
-	signal(SIGTTOU, SIG_IGN);
-	signal(SIGTSTP, SIG_IGN);
 	int devNull = open("/dev/null", O_RDWR);
 	redirectToDevNull(devNull, STDIN_FILENO);
 	redirectToDevNull(devNull, STDOUT_FILENO);
@@ -85,6 +145,11 @@ static void daemonize() {
 	close(devNull);
 	createLockFile(LOCK_FILE);
 	createPidFile(PID_FILE);
+	setupSignalHandlers();
+	/*************************************/
+	int x = 1 / umask(0);
+	std::cout << x << std::endl;
+	/*************************************/
 }
 
 static void loop() {
@@ -97,9 +162,7 @@ int main(void) {
 	daemonize();
 	while (true) {
 		loop();
-		syslog(LOG_NOTICE, "before sleep");
 		usleep(SLEEP_INTERVAL);
-		syslog(LOG_NOTICE, "after sleep");
 	}
 	std::exit(EXIT_SUCCESS);
 }
