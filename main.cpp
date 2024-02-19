@@ -21,17 +21,17 @@
 // TODO: Disassociate from the control terminal (and take steps not to reacquire
 // one)
 
-void do_heartbeat() {
+static void do_heartbeat() {
 	// TODO: implement processing code to be performed on each heartbeat
 }
 
-// TODO: understand why it is not recommended to allow argc, argv
-int main(void) {
+static void daemonize() {
 	pid_t pid = fork();
 	if (pid < 0) exit(EXIT_FAILURE);
 	if (pid > 0) exit(EXIT_SUCCESS);
 
 	umask(0);
+
 	openlog(DAEMON_NAME, LOG_NOWAIT | LOG_PID, LOG_USER);
 	syslog(LOG_NOTICE, "Successfully started " DAEMON_NAME);
 
@@ -48,6 +48,11 @@ int main(void) {
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
+}
+
+// TODO: understand why it is not recommended to allow argc, argv
+int main(void) {
+	daemonize();
 
 	const int SLEEP_INTERVAL = 5;
 	while (true) {
