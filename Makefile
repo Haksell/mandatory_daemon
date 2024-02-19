@@ -18,3 +18,11 @@ fclean: clean
 	rm -f $(NAME)
 
 re: fclean all
+
+run:
+	$(MAKE) all --no-print-directory
+	./$(NAME)
+	$(MAKE) fclean --no-print-directory
+
+kill:
+	pkill -f $(NAME)
