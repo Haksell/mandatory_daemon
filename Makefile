@@ -21,8 +21,9 @@ re: fclean all
 
 run:
 	$(MAKE) all --no-print-directory
-	./$(NAME)
+	sudo ./$(NAME)
 	$(MAKE) fclean --no-print-directory
 
 kill:
-	pkill -f $(NAME)
+	sudo pkill -f $(NAME)
+	sudo rm -f /var/run/matt_daemon.lock
