@@ -16,7 +16,8 @@ clean:
 
 kill:
 	sudo pkill -f $(NAME)
-	sudo rm -f /var/run/matt_daemon.lock
+	sudo rm -f /run/matt_daemon.lock
+	sudo rm -f /run/matt_daemon.pid
 
 fclean: clean kill
 	rm -f $(NAME)
