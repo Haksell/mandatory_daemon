@@ -14,7 +14,11 @@ main.o: main.cpp
 clean:
 	rm -f *.o
 
-fclean: clean
+kill:
+	sudo pkill -f $(NAME)
+	sudo rm -f /var/run/matt_daemon.lock
+
+fclean: clean kill
 	rm -f $(NAME)
 
 re: fclean all
@@ -23,7 +27,3 @@ run:
 	$(MAKE) all --no-print-directory
 	sudo ./$(NAME)
 	$(MAKE) fclean --no-print-directory
-
-kill:
-	sudo pkill -f $(NAME)
-	sudo rm -f /var/run/matt_daemon.lock
