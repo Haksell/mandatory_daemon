@@ -65,7 +65,7 @@ static void logSignal(int sig) {
 	static const std::unordered_map<int, std::string> signalNames = {
 		{SIGHUP, "SIGHUP"},	  {SIGINT, "SIGINT"},	  {SIGQUIT, "SIGQUIT"},
 		{SIGILL, "SIGILL"},	  {SIGTRAP, "SIGTRAP"},	  {SIGABRT, "SIGABRT"},
-		{SIGFPE, "SIGBUS"},	  {SIGFPE, "SIGFPE"},	  {SIGUSR1, "SIGUSR1"},
+		{SIGBUS, "SIGBUS"},	  {SIGFPE, "SIGFPE"},	  {SIGUSR1, "SIGUSR1"},
 		{SIGSEGV, "SIGSEGV"}, {SIGUSR2, "SIGUSR2"},	  {SIGPIPE, "SIGPIPE"},
 		{SIGALRM, "SIGALRM"}, {SIGTERM, "SIGTERM"},	  {SIGCHLD, "SIGCHLD"},
 		{SIGCONT, "SIGCONT"}, {SIGSTOP, "SIGSTOP"},	  {SIGTSTP, "SIGTSTP"},
