@@ -63,7 +63,7 @@ static void handleSIGCHLD(int sig) {
 	}
 }
 
-static void setupSignalHandlers() {
+static void setupRemainingSignals() {
 	signal(SIGHUP, handleRemainingSignals);
 	signal(SIGINT, handleRemainingSignals);
 	signal(SIGQUIT, handleRemainingSignals);
@@ -78,17 +78,12 @@ static void setupSignalHandlers() {
 	signal(SIGPIPE, handleRemainingSignals);
 	signal(SIGALRM, handleRemainingSignals);
 	signal(SIGTERM, handleRemainingSignals);
-	signal(SIGCHLD, handleSIGCHLD);
 	signal(SIGCONT, handleRemainingSignals);
-	signal(SIGTSTP, SIG_IGN);
-	signal(SIGTTIN, SIG_IGN);
-	signal(SIGTTOU, SIG_IGN);
 	signal(SIGURG, handleRemainingSignals);
 	signal(SIGXCPU, handleRemainingSignals);
 	signal(SIGXFSZ, handleRemainingSignals);
 	signal(SIGVTALRM, handleRemainingSignals);
 	signal(SIGPROF, handleRemainingSignals);
-	signal(SIGWINCH, SIG_IGN);
 	signal(SIGIO, handleRemainingSignals);
 	signal(SIGPWR, handleRemainingSignals);
 }
@@ -106,7 +101,11 @@ static void daemonize() {
 	redirectToDevNull(devNull, STDOUT_FILENO);
 	redirectToDevNull(devNull, STDERR_FILENO);
 	close(devNull);
-	setupSignalHandlers();
+	signal(SIGCHLD, handleSIGCHLD);
+	signal(SIGTSTP, SIG_IGN);
+	signal(SIGTTIN, SIG_IGN);
+	signal(SIGTTOU, SIG_IGN);
+	signal(SIGWINCH, SIG_IGN);
 }
 
 int main(void) {
@@ -114,10 +113,9 @@ int main(void) {
 	try {
 		fdLock = createLockFile(LOCK_FILE);
 		fdPid = createPidFile(PID_FILE);
-		if (DEBUG) {
-			atexit(cleanup);
-			setupSignalHandlers();
-		} else daemonize();
+		if (!DEBUG) daemonize();
+		atexit(cleanup);
+		setupRemainingSignals();
 		server.init();
 		server.loop();
 	} catch (SystemError&) {
