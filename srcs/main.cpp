@@ -1,5 +1,7 @@
 #include "../includes/matt_daemon.hpp"
 
+Tintin_reporter logger(LOG_FILE);
+
 static void becomeChild() {
 	pid_t pid = fork();
 	if (pid < 0) panic("fork() failed");
@@ -117,7 +119,7 @@ static void daemonize() {
 
 int main(void) {
 	daemonize();
-	Server server(PORT, LOG_FILE);
+	Server server(PORT);
 	try {
 		server.init();
 		server.loop();

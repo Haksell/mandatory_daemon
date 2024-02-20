@@ -1,7 +1,8 @@
-#include "../includes/Server.hpp"
+#include "../includes/matt_daemon.hpp"
 
-Server::Server(uint16_t port, const char* logFile)
-	: _port(port), _logger(Tintin_reporter(logFile)) {}
+extern Tintin_reporter logger;
+
+Server::Server(uint16_t port) : _port(port) {}
 
 Server::~Server() {
 	deleteVector(&_clients);
@@ -107,18 +108,18 @@ void Server::acceptNewClient() {
 	syscall(epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClientSocket, &ev), "epoll_ctl");
 }
 
-inline bool isNotNewline(int ch) { return ch != '\r' && ch != '\n'; }
+inline bool isNewline(int ch) { return ch == '\r' || ch == '\n'; }
 
 std::string trimNewlines(const std::string& str) {
-	auto begin = std::find_if_not(str.begin(), str.end(), isNotNewline);
-	auto end = std::find_if_not(str.rbegin(), str.rend(), isNotNewline).base();
+	auto begin = std::find_if_not(str.begin(), str.end(), isNewline);
+	auto end = std::find_if_not(str.rbegin(), str.rend(), isNewline).base();
 	if (begin >= end) return "";
 	return std::string(begin, end);
 }
 
 void Server::handleMessage(Client* client, std::string message) {
 	(void)client;
-	_logger.log(trimNewlines(message));
+	logger.log(trimNewlines(message));
 }
 
 void Server::readFromClient(Client* client) {
@@ -139,5 +140,9 @@ void Server::readFromClient(Client* client) {
 		std::string line = client->_message.substr(0, pos);
 		client->_message = client->_message.substr(pos + 1);
 		handleMessage(client, line);
+	}
+	if (!client->_message.empty()) {
+		handleMessage(client, client->_message);
+		client->_message.clear();
 	}
 }

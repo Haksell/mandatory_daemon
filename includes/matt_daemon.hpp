@@ -74,12 +74,12 @@ void panic(const char* format, ...);
 
 // TODO: Coplien classes
 
-class Client;
 class Tintin_reporter;
+class Client;
 class Server;
 
-#include "Client.hpp"
-
 #include "Tintin_reporter.hpp"
+
+#include "Client.hpp"
 
 #include "Server.hpp"

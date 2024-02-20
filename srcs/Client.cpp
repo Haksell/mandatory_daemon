@@ -1,5 +1,4 @@
-#include "../includes/Client.hpp"
-#include "../includes/Server.hpp"
+#include "../includes/matt_daemon.hpp"
 
 Client::Client(Server* server, int socketFd, sockaddr_in clientAddress)
 	: _clientSocket(socketFd), _clientAddress(clientAddress), _server(server) {}

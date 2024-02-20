@@ -4,7 +4,7 @@
 
 class Server {
 public:
-	Server(uint16_t port, const char* logFile);
+	Server(uint16_t port);
 	~Server();
 
 	void init();
@@ -21,7 +21,6 @@ private:
 	struct sockaddr_in _serverAddress;
 	struct epoll_event _eventList[MAX_CLIENTS];
 	uint16_t _port;
-	Tintin_reporter _logger;
 
 	std::vector<Client*> _clients;
 	std::vector<Client*> _clientsToDelete;
