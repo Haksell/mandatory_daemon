@@ -67,6 +67,8 @@ public:
 		return (NULL);
 	}
 
+	static const size_t maxClients = 3;
+
 private:
 	int _serverSocket;
 	int _epollFd;
@@ -79,23 +81,30 @@ private:
 	std::vector<Client*> _clientsToDelete;
 
 	void acceptNewClient() {
-		int newClientSocket;
-		struct sockaddr_in newClientAddress;
-		socklen_t newClientAddressLen = sizeof(newClientAddress);
-
-		syscall(newClientSocket =
-					accept(_serverSocket, (struct sockaddr*)&newClientAddress,
-						   (socklen_t*)&newClientAddressLen),
-				"accept");
-		_clients.push_back(new Client(this, newClientSocket, newClientAddress));
-		syscall(fcntl(newClientSocket, F_SETFL, O_NONBLOCK), "fcntl");
-		struct epoll_event ev;
-		ev.data.fd = newClientSocket;
-		ev.events = EPOLLIN | EPOLLRDHUP | EPOLLHUP;
-		syscall(setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &_reuseAddr,
-						   sizeof(_reuseAddr)),
-				"setsockopt");
-		syscall(epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClientSocket, &ev), "epoll_ctl");
+		struct sockaddr_in clientAddress;
+		socklen_t addressLen = sizeof(clientAddress);
+		int clientSocket =
+			accept(_serverSocket, (struct sockaddr*)&clientAddress, &addressLen);
+		syscall(clientSocket, "accept");
+		Client* client = new Client(this, clientSocket, clientAddress);
+		if (_clients.size() >= Server::maxClients) {
+			logger.log(LogLevel::ERROR,
+					   "[%s] The server is being DDOSed. Connection refused.",
+					   client->getFullAddress().c_str());
+			delete client;
+		} else {
+			_clients.push_back(client);
+			syscall(fcntl(clientSocket, F_SETFL, O_NONBLOCK), "fcntl");
+			struct epoll_event ev;
+			ev.data.fd = clientSocket;
+			ev.events = EPOLLIN | EPOLLRDHUP | EPOLLHUP;
+			syscall(setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &_reuseAddr,
+							   sizeof(_reuseAddr)),
+					"setsockopt");
+			syscall(epoll_ctl(_epollFd, EPOLL_CTL_ADD, clientSocket, &ev), "epoll_ctl");
+			logger.log(LogLevel::INFO, "[%s] Client connected",
+					   client->getFullAddress().c_str());
+		}
 	}
 
 	void readFromClient(Client* client) {
@@ -129,7 +138,8 @@ private:
 		std::string lowerMessage = toLowerCase(trimmedMessage);
 		if (lowerMessage == "quit") throw TerminateSuccess();
 		// TODO: authenticate, encrypton, encryptoff, rshon, rshoff...
-		logger.log(LogLevel::LOG, trimmedMessage.c_str());
+		logger.log(LogLevel::LOG, "[%s] %s", client->getFullAddress().c_str(),
+				   trimmedMessage.c_str());
 	}
 
 	void removeClient(Client* client) {
@@ -141,6 +151,8 @@ private:
 		for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end();
 			 ++it) {
 			if ((*it) == client) {
+				logger.log(LogLevel::INFO, "[%s] Client disconnected",
+						   (*it)->getFullAddress().c_str());
 				_clients.erase(it);
 				_clientsToDelete.push_back(client);
 				break;

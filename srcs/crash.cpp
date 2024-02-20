@@ -1,5 +1,4 @@
 #include "../includes/matt_daemon.hpp"
-#include <cstring>
 
 extern Tintin_reporter logger;
 
@@ -24,7 +23,7 @@ void syscall(int returnValue, const char* funcName) {
 void panic(const char* format, ...) {
 	va_list args;
 	va_start(args, format);
-	logger.vlog(LogLevel::ERROR, format, args); // TODO: ERROR
+	logger.vlog(LogLevel::ERROR, format, args);
 	va_end(args);
 	throw SystemError();
 }

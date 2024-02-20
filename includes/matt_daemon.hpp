@@ -77,6 +77,13 @@ void deleteVector(std::vector<T*>* vec) {
 	vec->clear();
 }
 
+template <typename T>
+std::string toString(T x) {
+	std::stringstream ss;
+	ss << x;
+	return ss.str();
+}
+
 // crash.cpp
 void cleanup();
 void fileError(const char* action, const char* filename);
