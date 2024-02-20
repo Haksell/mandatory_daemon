@@ -19,7 +19,10 @@ static void redirectToDevNull(int devNull, int fd) {
 static int createLockFile(const char* filename) {
 	int fd = open(filename, O_RDWR | O_CREAT, 0640);
 	if (fd < 0) fileError("open", filename);
-	if (flock(fd, LOCK_EX | LOCK_NB) < 0) fileError("lock", filename);
+	if (flock(fd, LOCK_EX | LOCK_NB) < 0) {
+		close(fd);
+		fileError("lock", filename);
+	}
 	return fd;
 }
 
@@ -92,7 +95,6 @@ static void daemonize() {
 	becomeChild();
 	if (setsid() < 0) panic("setsid() failed");
 	becomeChild();
-	atexit(cleanup);
 	logger.log(LogLevel::INFO, "Successfully started " DAEMON_NAME);
 	umask(0);
 	if (chdir("/") < 0) panic("Failed to change directory to /");
@@ -118,10 +120,6 @@ int main(void) {
 		setupRemainingSignals();
 		server.init();
 		server.loop();
-	} catch (SystemError&) {
-	} catch (TerminateSuccess&) {
-		logger.log(LogLevel::INFO, "Stopping " DAEMON_NAME);
-		exitValue = EXIT_SUCCESS;
 	} catch (const std::exception& e) {
 		logger.log(LogLevel::ERROR, "Unexpected exception: %s", e.what());
 	}

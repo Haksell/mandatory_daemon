@@ -60,16 +60,6 @@
 #define BUFFER_SIZE 1024
 #define PORT 4242
 
-class SystemError : public std::exception {
-public:
-	explicit SystemError() : std::exception() {}
-};
-
-class TerminateSuccess : public std::exception {
-public:
-	explicit TerminateSuccess() : std::exception() {}
-};
-
 template <typename T>
 void deleteVector(std::vector<T*>* vec) {
 	for (typename std::vector<T*>::iterator it = vec->begin(); it != vec->end(); it++)

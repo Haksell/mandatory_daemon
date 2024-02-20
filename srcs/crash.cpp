@@ -21,7 +21,7 @@ void fileError(const char* action, const char* filename) {
 void syscall(int returnValue, const char* funcName) {
 	if (returnValue < 0) {
 		logger.log(LogLevel::ERROR, "%s: %s", funcName, strerror(errno));
-		throw SystemError();
+		std::exit(EXIT_FAILURE);
 	}
 }
 
@@ -30,5 +30,5 @@ void panic(const char* format, ...) {
 	va_start(args, format);
 	logger.vlog(LogLevel::ERROR, format, args);
 	va_end(args);
-	throw SystemError();
+	std::exit(EXIT_FAILURE);
 }
