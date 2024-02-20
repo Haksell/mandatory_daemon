@@ -18,7 +18,7 @@ else
 endif
 
 SRCS := $(wildcard $(SRCS_DIR)*.cpp)
-HEADERS := $(wildcard $(INCS_DIR)*.cpp)
+HEADERS := $(wildcard $(INCS_DIR)*.hpp)
 FILENAMES := $(basename $(SRCS))
 FOLDERS := $(sort $(dir $(SRCS)))
 OBJS := $(FILENAMES:$(SRCS_DIR)%=$(OBJS_DIR)%.o)
@@ -47,14 +47,14 @@ $(NAME) $(BONUS): $(OBJS)
 
 clean:
 	@echo "Removing $(OBJS_DIR)"
-	@$(RM) $(OBJS_DIR) *VBox*.log
+	@$(RM) $(OBJS_DIR)
 
 kill:
 	sudo pkill -9 $(NAME) || true
-	sudo rm -f $(LOCK_FILE)
-	sudo rm -f $(LOG_FILE)
-	sudo rm -f $(PID_FILE)
-	sudo rm -f /tmp/matt_daemon*
+	sudo $(RM) $(LOCK_FILE) || true
+	sudo $(RM) $(LOG_FILE) || true
+	sudo $(RM) $(PID_FILE) || true
+	sudo $(RM) /tmp/matt_daemon* || true
 
 fclean: clean kill
 	@echo "Removing $(NAME)"
@@ -85,4 +85,8 @@ info:
 logs:
 	@sudo tail -f $(LOG_FILE)
 
-.PHONY: all clean kill fclean re run info logs
+rmvagrant: fclean
+	$(RM) *VBox*.log
+	vagrant destroy -f
+
+.PHONY: all clean kill fclean re run rerun debug redebug info logs rmvagrant

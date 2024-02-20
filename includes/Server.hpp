@@ -108,15 +108,16 @@ private:
 	}
 
 	void readFromClient(Client* client) {
-		char buffer[BUFFER_SIZE] = {0};
+		static const size_t bufferSize = 1024;
+		char buffer[bufferSize] = {0};
 		int recvSize;
 
 		do {
-			syscall(recvSize = recv(client->getSocket(), buffer, BUFFER_SIZE - 1, 0),
+			syscall(recvSize = recv(client->getSocket(), buffer, bufferSize - 1, 0),
 					"recv");
 			buffer[recvSize] = '\0';
 			client->_message += buffer;
-		} while (recvSize == BUFFER_SIZE - 1);
+		} while (recvSize == bufferSize - 1);
 
 		if (client->_message.empty()) return removeClient(client);
 
