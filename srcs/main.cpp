@@ -111,7 +111,6 @@ static void daemonize() {
 }
 
 int main(void) {
-	int exitValue = EXIT_FAILURE;
 	try {
 		fdLock = createLockFile(LOCK_FILE);
 		fdPid = createPidFile(PID_FILE);
@@ -123,5 +122,5 @@ int main(void) {
 	} catch (const std::exception& e) {
 		logger.log(LogLevel::ERROR, "Unexpected exception: %s", e.what());
 	}
-	std::exit(exitValue);
+	std::exit(EXIT_FAILURE);
 }

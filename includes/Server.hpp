@@ -147,11 +147,9 @@ private:
 	}
 
 	void removeClient(Client* client) {
-		client->_message = "";
-
+		client->_message.clear();
 		epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->getSocket(), NULL);
 		close(client->getSocket());
-
 		for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end();
 			 ++it) {
 			if ((*it) == client) {
