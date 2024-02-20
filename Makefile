@@ -35,10 +35,7 @@ info:
 	@ps aux | grep '[M]att_daemon' || true
 	@ls -lah /run | grep matt_daemon || true
 
-logs_full:
-	@sudo tail -f /var/log/syslog
-
-logs_matt:
+logs:
 	@sudo tail -f /var/log/syslog | grep 'Matt_daemon'
 
 .PHONY: all clean kill fclean re run info logs_full logs_matt

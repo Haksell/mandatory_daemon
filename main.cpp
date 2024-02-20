@@ -86,12 +86,6 @@ static void handleRemainingSignals(int sig) {
 	std::exit(EXIT_SUCCESS);
 }
 
-static void handleSIGQUIT(int sig) {
-	logSignal(sig);
-	signal(sig, SIG_DFL);
-	raise(sig);
-}
-
 static void handleSIGCHLD(int sig) {
 	logSignal(sig);
 	while (waitpid(-1, NULL, WNOHANG) > 0) {
@@ -101,7 +95,7 @@ static void handleSIGCHLD(int sig) {
 static void setupSignalHandlers() {
 	signal(SIGHUP, handleRemainingSignals);
 	signal(SIGINT, handleRemainingSignals);
-	signal(SIGQUIT, handleSIGQUIT);
+	signal(SIGQUIT, handleRemainingSignals);
 	signal(SIGILL, handleRemainingSignals);
 	signal(SIGTRAP, handleRemainingSignals);
 	signal(SIGABRT, handleRemainingSignals);
