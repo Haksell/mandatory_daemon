@@ -48,6 +48,7 @@ kill:
 	sudo pkill -9 $(NAME) || true
 	sudo rm -f /run/matt_daemon.lock
 	sudo rm -f /run/matt_daemon.pid
+	sudo rm -f /var/log/matt_daemon.log
 
 fclean: clean kill
 	@echo "Removing $(NAME)"
