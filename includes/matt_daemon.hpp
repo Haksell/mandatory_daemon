@@ -27,13 +27,25 @@
 #include <sys/file.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-#include <sys/syslog.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <syslog.h>
 #include <unistd.h>
 #include <unordered_map>
 #include <vector>
+
+#ifndef DEBUG
+#define DEBUG false
+#endif
+
+#if DEBUG
+#define LOCK_FILE "/tmp/matt_daemon.lock"
+#define PID_FILE "/tmp/matt_daemon.pid"
+#define LOG_FILE "/tmp/matt_daemon.log"
+#else
+#define LOCK_FILE "/var/lock/matt_daemon.lock"
+#define PID_FILE "/run/matt_daemon.pid"
+#define LOG_FILE "/var/log/matt_daemon.log"
+#endif
 
 #define RESET "\033[0m"
 #define RED "\033[31m"
@@ -43,23 +55,19 @@
 #define DAEMON_NAME "Matt_daemon"
 #define SLEEP_INTERVAL 1000000
 
-#define LOCK_FILE "/var/lock/matt_daemon.lock"
-#define PID_FILE "/run/matt_daemon.pid"
-#define LOG_FILE "/var/log/matt_daemon.log"
-
 #define BACKLOG 128
 #define MAX_CLIENTS 1024
 #define BUFFER_SIZE 1024
 #define PORT 4242
 
-class SystemError : public std::runtime_error {
+class SystemError : public std::exception {
 public:
-	explicit SystemError(const char* funcName)
-		: std::runtime_error(funcName), funcName(funcName) {}
+	explicit SystemError() : std::exception() {}
+};
 
-	virtual ~SystemError() throw() {}
-
-	const char* funcName;
+class TerminateSuccess : public std::exception {
+public:
+	explicit TerminateSuccess() : std::exception() {}
 };
 
 template <typename T>
@@ -69,10 +77,14 @@ void deleteVector(std::vector<T*>* vec) {
 	vec->clear();
 }
 
+// crash.cpp
 void cleanup();
 void fileError(const char* action, const char* filename);
 void panic(const char* format, ...);
 void syscall(int returnValue, const char* funcName);
+
+// utils.cpp
+std::string toLowerCase(const std::string& str);
 std::string trimNewlines(const std::string& str);
 
 // TODO: Coplien classes

@@ -1,6 +1,7 @@
 #include "../includes/matt_daemon.hpp"
 
 Tintin_reporter logger(LOG_FILE);
+Server server(PORT);
 
 static void becomeChild() {
 	pid_t pid = fork();
@@ -44,14 +45,14 @@ static void logSignal(int sig) {
 
 	};
 	auto it = signalNames.find(sig);
-	syslog(LOG_NOTICE, "Received signal %d (%s)", sig,
-		   it == signalNames.end() ? "UNKNOWN" : it->second.c_str());
+	logger.log(LogLevel::INFO, "Received signal %d (%s)", sig,
+			   it == signalNames.end() ? "UNKNOWN" : it->second.c_str());
 }
 
 static void handleRemainingSignals(int sig) {
 	logSignal(sig);
-	syslog(LOG_NOTICE, "Stopping " DAEMON_NAME);
-	std::exit(EXIT_SUCCESS);
+	logger.log(LogLevel::INFO, "Stopping " DAEMON_NAME);
+	std::exit(EXIT_SUCCESS); // ???
 }
 
 static void handleSIGCHLD(int sig) {
@@ -98,8 +99,7 @@ static void daemonize() {
 	if (setsid() < 0) panic("setsid() failed");
 	becomeChild();
 	atexit(cleanup);
-	openlog(DAEMON_NAME, LOG_NOWAIT | LOG_PID, LOG_USER);
-	syslog(LOG_NOTICE, "Successfully started " DAEMON_NAME);
+	logger.log(LogLevel::INFO, "Successfully started " DAEMON_NAME);
 	umask(0);
 	if (chdir("/") < 0) panic("Failed to change directory to /");
 	int devNull = open("/dev/null", O_RDWR);
@@ -111,18 +111,17 @@ static void daemonize() {
 }
 
 int main(void) {
-	daemonize();
-	Server server(PORT);
+	int exitValue = EXIT_FAILURE;
 	try {
+		if (!DEBUG) daemonize();
 		server.init();
 		server.loop();
-		return EXIT_SUCCESS;
-	} catch (const SystemError& e) {
-		std::perror(e.funcName);
-		return EXIT_FAILURE;
+	} catch (SystemError&) {
+	} catch (TerminateSuccess&) {
+		logger.log(LogLevel::INFO, "Stopping " DAEMON_NAME);
+		exitValue = EXIT_SUCCESS;
 	} catch (const std::exception& e) {
-		std::cerr << e.what() << std::endl;
-		return EXIT_FAILURE;
+		logger.log(LogLevel::ERROR, "Unexpected exception: %s", e.what());
 	}
-	std::exit(EXIT_SUCCESS);
+	std::exit(exitValue);
 }

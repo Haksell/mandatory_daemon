@@ -10,6 +10,13 @@ PID_FILE := /run/matt_daemon.pid
 CXX := c++
 CXXFLAGS := -Wall -Wextra -Werror -std=c++20 -I$(INCS_DIR)
 
+ifeq ($(DEBUG),true)
+    CXXFLAGS += -DDEBUG
+    LOCK_FILE := /tmp/matt_daemon.lock
+    LOG_FILE := /tmp/matt_daemon.log
+    PID_FILE := /tmp/matt_daemon.pid
+endif
+
 SRCS := $(wildcard $(SRCS_DIR)*.cpp)
 HEADERS := $(wildcard $(INCS_DIR)*.cpp)
 FILENAMES := $(basename $(SRCS))
@@ -18,6 +25,7 @@ OBJS := $(FILENAMES:$(SRCS_DIR)%=$(OBJS_DIR)%.o)
 
 RM := rm -rf
 MKDIR := mkdir -p
+VALGRIND := valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
 
 END := \033[0m
 RED := \033[31m
@@ -46,6 +54,7 @@ kill:
 	sudo rm -f $(LOCK_FILE)
 	sudo rm -f $(LOG_FILE)
 	sudo rm -f $(PID_FILE)
+	sudo rm -f /tmp/matt_daemon*
 
 fclean: clean kill
 	@echo "Removing $(NAME)"
@@ -57,10 +66,15 @@ re: fclean
 run:
 	$(MAKE) all --no-print-directory
 	sudo ./$(NAME)
-	$(MAKE) clean --no-print-directory
-	$(MAKE) client_logs --no-print-directory
+	$(MAKE) logs --no-print-directory
 
 rerun: fclean run
+
+debug:
+	$(MAKE) all DEBUG=true --no-print-directory
+	$(VALGRIND) ./$(NAME)
+
+redebug: fclean debug
 
 info:
 	@ps aux | grep '[M]att_daemon' || true
@@ -68,10 +82,7 @@ info:
 	@ls -lah $(LOG_FILE) || true
 	@ls -lah $(PID_FILE) || true
 
-sys_logs:
-	@sudo tail -f /var/log/syslog | grep 'Matt_daemon'
-
-client_logs:
+logs:
 	@sudo tail -f $(LOG_FILE)
 
-.PHONY: all clean kill fclean re run info sys_logs client_logs
+.PHONY: all clean kill fclean re run info logs

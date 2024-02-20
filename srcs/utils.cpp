@@ -8,3 +8,9 @@ std::string trimNewlines(const std::string& str) {
 	if (begin >= end) return "";
 	return std::string(begin, end);
 }
+
+std::string toLowerCase(const std::string& str) {
+	std::string res;
+	for (auto it = str.begin(); it != str.end(); it++) res += std::tolower(*it);
+	return res;
+}

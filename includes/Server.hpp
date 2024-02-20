@@ -16,18 +16,13 @@ public:
 	}
 
 	void init() {
-		// Server address initialization
 		std::memset(&_serverAddress, 0, sizeof(_serverAddress));
 		_serverAddress.sin_family = AF_INET;
 		_serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
 		_serverAddress.sin_port = htons(_port);
-
-		// Server socket creation
 		syscall(_serverSocket = socket(_serverAddress.sin_family, SOCK_STREAM, 0),
 				"socket");
 		fcntl(_serverSocket, F_SETFL, O_NONBLOCK);
-
-		// Server socket binding
 		_reuseAddr = 1;
 		syscall(setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &_reuseAddr,
 						   sizeof(_reuseAddr)),
@@ -36,8 +31,6 @@ public:
 					 sizeof(_serverAddress)),
 				"bind");
 		syscall(listen(_serverSocket, BACKLOG), "listen");
-
-		// Server socket epoll
 		struct epoll_event ev;
 		ev.data.fd = _serverSocket;
 		ev.events = EPOLLIN;
@@ -130,9 +123,13 @@ private:
 		}
 	}
 
-	void handleMessage(Client* client, std::string message) {
+	void handleMessage(Client* client, const std::string& message) {
 		(void)client;
-		logger.log(trimNewlines(message));
+		std::string trimmedMessage = trimNewlines(message);
+		std::string lowerMessage = toLowerCase(trimmedMessage);
+		if (lowerMessage == "quit") throw TerminateSuccess();
+		// TODO: authenticate, encrypton, encryptoff, rshon, rshoff...
+		logger.log(LogLevel::LOG, trimmedMessage.c_str());
 	}
 
 	void removeClient(Client* client) {
