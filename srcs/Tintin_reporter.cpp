@@ -3,7 +3,7 @@
 Tintin_reporter::Tintin_reporter(const std::string& filename) {
 	// TODO: check truncation
 	_file.open(filename, std::ios::out | std::ios::app);
-	if (!_file.is_open()) panic("Failed to open file %s", filename.c_str());
+	if (!_file.is_open()) fileError("open", filename.c_str());
 }
 
 Tintin_reporter::~Tintin_reporter() {

@@ -69,6 +69,7 @@ void deleteVector(std::vector<T*>* vec) {
 	vec->clear();
 }
 
+void fileError(const char* action, const char* filename);
 void syscall(int returnValue, const char* funcName);
 void panic(const char* format, ...);
 

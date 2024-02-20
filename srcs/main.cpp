@@ -15,8 +15,8 @@ static void redirectToDevNull(int devNull, int fd) {
 
 static int createLockFile(const char* filename) {
 	int fd = open(filename, O_RDWR | O_CREAT, 0640);
-	if (fd < 0) panic("Failed to open file %s", filename);
-	if (flock(fd, LOCK_EX | LOCK_NB) < 0) panic("Failed to lock file %s", filename);
+	if (fd < 0) fileError("open", filename);
+	if (flock(fd, LOCK_EX | LOCK_NB) < 0) fileError("lock", filename);
 	return fd;
 }
 
@@ -94,15 +94,17 @@ static void setupSignalHandlers() {
 static void cleanup() {
 	unlink(PID_FILE);
 	unlink(LOCK_FILE);
-	syslog(LOG_NOTICE, "cleanup()");
+	syslog(LOG_NOTICE, "cleanup " DAEMON_NAME);
 	closelog();
 }
 
 static void daemonize() {
+	atexit(cleanup);
+	createLockFile(LOCK_FILE);
+	createPidFile(PID_FILE);
 	becomeChild();
 	if (setsid() < 0) panic("setsid() failed");
 	becomeChild();
-	atexit(cleanup);
 	openlog(DAEMON_NAME, LOG_NOWAIT | LOG_PID, LOG_USER);
 	syslog(LOG_NOTICE, "Successfully started " DAEMON_NAME);
 	umask(0);
@@ -112,8 +114,6 @@ static void daemonize() {
 	redirectToDevNull(devNull, STDOUT_FILENO);
 	redirectToDevNull(devNull, STDERR_FILENO);
 	close(devNull);
-	createLockFile(LOCK_FILE);
-	createPidFile(PID_FILE);
 	setupSignalHandlers();
 }
 
