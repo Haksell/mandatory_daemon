@@ -40,6 +40,13 @@
 #define GREEN "\033[32m"
 #define BLUE "\033[34m"
 
+#define DAEMON_NAME "Matt_daemon"
+#define SLEEP_INTERVAL 1000000
+
+#define LOCK_FILE "/run/matt_daemon.lock"
+#define PID_FILE "/run/matt_daemon.pid"
+#define LOG_FILE "/var/log/matt_daemon.log"
+
 #define BACKLOG 128
 #define MAX_CLIENTS 1024
 #define BUFFER_SIZE 1024
@@ -57,14 +64,22 @@ public:
 
 template <typename T>
 void deleteVector(std::vector<T*>* vec) {
-	for (typename std::vector<T*>::iterator it = vec->begin(); it != vec->end();
-		 it++)
+	for (typename std::vector<T*>::iterator it = vec->begin(); it != vec->end(); it++)
 		delete *it;
 	vec->clear();
 }
 
+void syscall(int returnValue, const char* funcName);
+void panic(const char* format, ...);
+
+// TODO: Coplien classes
+
 class Client;
+class Tintin_reporter;
 class Server;
 
 #include "Client.hpp"
+
+#include "Tintin_reporter.hpp"
+
 #include "Server.hpp"

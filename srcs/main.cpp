@@ -1,19 +1,5 @@
 #include "../includes/matt_daemon.hpp"
 
-#define DAEMON_NAME "Matt_daemon"
-#define SLEEP_INTERVAL 1000000
-
-#define LOCK_FILE "/run/matt_daemon.lock"
-#define PID_FILE "/run/matt_daemon.pid"
-
-static void panic(const char* format, ...) {
-	va_list args;
-	va_start(args, format);
-	vsyslog(LOG_ERR, format, args);
-	va_end(args);
-	std::exit(EXIT_FAILURE);
-}
-
 static void becomeChild() {
 	pid_t pid = fork();
 	if (pid < 0) panic("fork() failed");
@@ -28,8 +14,7 @@ static void redirectToDevNull(int devNull, int fd) {
 static int createLockFile(const char* filename) {
 	int fd = open(filename, O_RDWR | O_CREAT, 0640);
 	if (fd < 0) panic("Failed to open file %s", filename);
-	if (flock(fd, LOCK_EX | LOCK_NB) < 0)
-		panic("Failed to lock file %s", filename);
+	if (flock(fd, LOCK_EX | LOCK_NB) < 0) panic("Failed to lock file %s", filename);
 	return fd;
 }
 
@@ -132,7 +117,7 @@ static void daemonize() {
 
 int main(void) {
 	daemonize();
-	Server server(PORT);
+	Server server(PORT, LOG_FILE);
 	try {
 		server.init();
 		server.loop();

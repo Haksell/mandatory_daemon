@@ -7,6 +7,7 @@ CXX := c++
 CXXFLAGS := -Wall -Wextra -Werror -std=c++20 -I$(INCS_DIR)
 
 SRCS		+= srcs/main.cpp
+SRCS		+= srcs/crash.cpp
 SRCS		+= srcs/Server.cpp
 SRCS		+= srcs/Client.cpp
 
