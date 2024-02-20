@@ -38,4 +38,4 @@ info:
 logs:
 	@sudo tail -f /var/log/syslog | grep 'Matt_daemon'
 
-.PHONY: all clean kill fclean re run info logs_full logs_matt
+.PHONY: all clean kill fclean re run info logs
