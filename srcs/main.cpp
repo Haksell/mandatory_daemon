@@ -1,24 +1,4 @@
-#include <csignal>
-#include <cstdarg>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <dirent.h>
-#include <fcntl.h>
-#include <iostream>
-#include <iterator>
-#include <sstream>
-#include <stdlib.h>
-#include <string>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/syslog.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <syslog.h>
-#include <unistd.h>
-#include <unordered_map>
-#include <vector>
+#include "../includes/matt_daemon.hpp"
 
 #define DAEMON_NAME "Matt_daemon"
 #define SLEEP_INTERVAL 1000000
@@ -48,7 +28,8 @@ static void redirectToDevNull(int devNull, int fd) {
 static int createLockFile(const char* filename) {
 	int fd = open(filename, O_RDWR | O_CREAT, 0640);
 	if (fd < 0) panic("Failed to open file %s", filename);
-	if (flock(fd, LOCK_EX | LOCK_NB) < 0) panic("Failed to lock file %s", filename);
+	if (flock(fd, LOCK_EX | LOCK_NB) < 0)
+		panic("Failed to lock file %s", filename);
 	return fd;
 }
 
@@ -149,17 +130,19 @@ static void daemonize() {
 	setupSignalHandlers();
 }
 
-static void loop() {
-	static int i = 0;
-	syslog(LOG_NOTICE, "Running " DAEMON_NAME "... %d", i);
-	++i;
-}
-
 int main(void) {
 	daemonize();
-	while (true) {
-		loop();
-		usleep(SLEEP_INTERVAL);
+	Server server(PORT);
+	try {
+		server.init();
+		server.loop();
+		return EXIT_SUCCESS;
+	} catch (const SystemError& e) {
+		std::perror(e.funcName);
+		return EXIT_FAILURE;
+	} catch (const std::exception& e) {
+		std::cerr << e.what() << std::endl;
+		return EXIT_FAILURE;
 	}
 	std::exit(EXIT_SUCCESS);
 }
