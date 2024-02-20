@@ -43,7 +43,7 @@
 #define DAEMON_NAME "Matt_daemon"
 #define SLEEP_INTERVAL 1000000
 
-#define LOCK_FILE "/run/matt_daemon.lock"
+#define LOCK_FILE "/var/lock/matt_daemon.lock"
 #define PID_FILE "/run/matt_daemon.pid"
 #define LOG_FILE "/var/log/matt_daemon.log"
 
@@ -69,6 +69,7 @@ void deleteVector(std::vector<T*>* vec) {
 	vec->clear();
 }
 
+void cleanup();
 void fileError(const char* action, const char* filename);
 void syscall(int returnValue, const char* funcName);
 void panic(const char* format, ...);

@@ -3,7 +3,7 @@ SRCS_DIR := srcs/
 OBJS_DIR := objs/
 INCS_DIR := includes/
 
-LOCK_FILE := /run/matt_daemon.lock
+LOCK_FILE := /var/lock/matt_daemon.lock
 LOG_FILE := /var/log/matt_daemon.log
 PID_FILE := /run/matt_daemon.pid
 
@@ -38,7 +38,7 @@ $(NAME) $(BONUS): $(OBJS)
 	@echo "$(BLUE)$@ is compiled.$(END)"
 
 clean:
-	@echo "Removing $(OBJS_DIR)"
+	@echo "Removing $(OBJS_DIR)"tt_daem
 	@$(RM) $(OBJS_DIR) ${GARBAGE}
 
 kill:
@@ -64,7 +64,9 @@ rerun: fclean run
 
 info:
 	@ps aux | grep '[M]att_daemon' || true
-	@ls -lah /run | grep matt_daemon || true
+	@ls -lah $(LOCK_FILE) || true
+	@ls -lah $(LOG_FILE) || true
+	@ls -lah $(PID_FILE) || true
 
 sys_logs:
 	@sudo tail -f /var/log/syslog | grep 'Matt_daemon'

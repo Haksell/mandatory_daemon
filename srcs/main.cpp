@@ -91,20 +91,13 @@ static void setupSignalHandlers() {
 	signal(SIGPWR, handleRemainingSignals);
 }
 
-static void cleanup() {
-	unlink(PID_FILE);
-	unlink(LOCK_FILE);
-	syslog(LOG_NOTICE, "cleanup " DAEMON_NAME);
-	closelog();
-}
-
 static void daemonize() {
-	atexit(cleanup);
 	createLockFile(LOCK_FILE);
 	createPidFile(PID_FILE);
 	becomeChild();
 	if (setsid() < 0) panic("setsid() failed");
 	becomeChild();
+	atexit(cleanup);
 	openlog(DAEMON_NAME, LOG_NOWAIT | LOG_PID, LOG_USER);
 	syslog(LOG_NOTICE, "Successfully started " DAEMON_NAME);
 	umask(0);
