@@ -3,10 +3,6 @@ SRCS_DIR := srcs/
 OBJS_DIR := objs/
 INCS_DIR := includes/
 
-LOCK_FILE := /var/lock/matt_daemon.lock
-LOG_FILE := /var/log/matt_daemon.log
-PID_FILE := /run/matt_daemon.pid
-
 CXX := c++
 CXXFLAGS := -Wall -Wextra -Werror -std=c++20 -I$(INCS_DIR)
 
@@ -15,6 +11,10 @@ ifeq ($(DEBUG),true)
     LOCK_FILE := /tmp/matt_daemon.lock
     LOG_FILE := /tmp/matt_daemon.log
     PID_FILE := /tmp/matt_daemon.pid
+else
+	LOCK_FILE := /var/lock/matt_daemon.lock
+	LOG_FILE := /var/log/matt_daemon.log
+	PID_FILE := /run/matt_daemon.pid
 endif
 
 SRCS := $(wildcard $(SRCS_DIR)*.cpp)
@@ -25,7 +25,7 @@ OBJS := $(FILENAMES:$(SRCS_DIR)%=$(OBJS_DIR)%.o)
 
 RM := rm -rf
 MKDIR := mkdir -p
-VALGRIND := valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
+VALGRIND := valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes -q
 
 END := \033[0m
 RED := \033[31m
@@ -46,8 +46,8 @@ $(NAME) $(BONUS): $(OBJS)
 	@echo "$(BLUE)$@ is compiled.$(END)"
 
 clean:
-	@echo "Removing $(OBJS_DIR)"tt_daem
-	@$(RM) $(OBJS_DIR) ${GARBAGE}
+	@echo "Removing $(OBJS_DIR)"
+	@$(RM) $(OBJS_DIR) *VBox*.log
 
 kill:
 	sudo pkill -9 $(NAME) || true

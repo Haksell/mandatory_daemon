@@ -2,6 +2,8 @@
 
 Tintin_reporter logger(LOG_FILE);
 Server server(PORT);
+int fdLock = -1;
+int fdPid = -1;
 
 static void becomeChild() {
 	pid_t pid = fork();
@@ -52,7 +54,7 @@ static void logSignal(int sig) {
 static void handleRemainingSignals(int sig) {
 	logSignal(sig);
 	logger.log(LogLevel::INFO, "Stopping " DAEMON_NAME);
-	std::exit(EXIT_SUCCESS); // ???
+	std::exit(EXIT_SUCCESS);
 }
 
 static void handleSIGCHLD(int sig) {
@@ -78,7 +80,6 @@ static void setupSignalHandlers() {
 	signal(SIGTERM, handleRemainingSignals);
 	signal(SIGCHLD, handleSIGCHLD);
 	signal(SIGCONT, handleRemainingSignals);
-	signal(SIGSTOP, handleRemainingSignals);
 	signal(SIGTSTP, SIG_IGN);
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN);
@@ -93,8 +94,6 @@ static void setupSignalHandlers() {
 }
 
 static void daemonize() {
-	createLockFile(LOCK_FILE);
-	createPidFile(PID_FILE);
 	becomeChild();
 	if (setsid() < 0) panic("setsid() failed");
 	becomeChild();
@@ -113,7 +112,12 @@ static void daemonize() {
 int main(void) {
 	int exitValue = EXIT_FAILURE;
 	try {
-		if (!DEBUG) daemonize();
+		fdLock = createLockFile(LOCK_FILE);
+		fdPid = createPidFile(PID_FILE);
+		if (DEBUG) {
+			atexit(cleanup);
+			setupSignalHandlers();
+		} else daemonize();
 		server.init();
 		server.loop();
 	} catch (SystemError&) {

@@ -2,3 +2,4 @@
 Matt_daemon
 .nfs*
 .vagrant
+*VBox*.log
