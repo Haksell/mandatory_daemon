@@ -4,13 +4,17 @@
 
 class Client {
 public:
-	Client(Server* server, int socketFd, sockaddr_in clientAddress);
-	~Client();
+	Client(Server* server, int socketFd, sockaddr_in clientAddress)
+		: _clientSocket(socketFd), _clientAddress(clientAddress), _server(server) {}
 
-	int getSocket() const;
-	sockaddr_in getClientAddress() const;
-	Server* getServer() const;
-	void reply(std::string replyMessage) const;
+	~Client() { close(_clientSocket); }
+
+	int getSocket() const { return _clientSocket; }
+
+	void reply(std::string replyMessage) {
+		replyMessage += "\n";
+		send(_clientSocket, replyMessage.c_str(), replyMessage.length(), MSG_NOSIGNAL);
+	}
 
 	std::string _message;
 

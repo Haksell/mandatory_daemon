@@ -71,8 +71,9 @@ void deleteVector(std::vector<T*>* vec) {
 
 void cleanup();
 void fileError(const char* action, const char* filename);
-void syscall(int returnValue, const char* funcName);
 void panic(const char* format, ...);
+void syscall(int returnValue, const char* funcName);
+std::string trimNewlines(const std::string& str);
 
 // TODO: Coplien classes
 
