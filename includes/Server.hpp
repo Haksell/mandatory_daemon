@@ -86,7 +86,7 @@ private:
 		int clientSocket =
 			accept(_serverSocket, (struct sockaddr*)&clientAddress, &addressLen);
 		syscall(clientSocket, "accept");
-		Client* client = new Client(this, clientSocket, clientAddress);
+		Client* client = new Client(clientSocket, clientAddress);
 		if (_clients.size() >= Server::maxClients) {
 			logger.log(LogLevel::ERROR,
 					   "[%s] The server is being DDOSed. Connection refused.",

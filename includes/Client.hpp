@@ -4,8 +4,8 @@
 
 class Client {
 public:
-	Client(Server* server, int socketFd, sockaddr_in clientAddress)
-		: _clientSocket(socketFd), _clientAddress(clientAddress), _server(server) {
+	Client(int socketFd, sockaddr_in clientAddress)
+		: _clientSocket(socketFd), _clientAddress(clientAddress) {
 		char clientInfo[INET_ADDRSTRLEN];
 		inet_ntop(AF_INET, &(_clientAddress.sin_addr), clientInfo, INET_ADDRSTRLEN);
 		int clientPort = ntohs(_clientAddress.sin_port);
@@ -29,5 +29,4 @@ private:
 	int _clientSocket;
 	sockaddr_in _clientAddress;
 	std::string _fullAddress;
-	Server* _server;
 };

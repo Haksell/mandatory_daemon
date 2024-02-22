@@ -51,7 +51,6 @@
 #define BLUE "\033[34m"
 
 #define DAEMON_NAME "Matt_daemon"
-#define SLEEP_INTERVAL 1000000
 
 #define BACKLOG 8
 #define MAX_CLIENTS 8
