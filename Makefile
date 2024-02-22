@@ -1,5 +1,3 @@
-# TODO: 1023 chars bug
-
 NAME := Matt_daemon
 SRCS_DIR := srcs/
 OBJS_DIR := objs/

@@ -142,10 +142,7 @@ private:
 		(void)client;
 		std::string trimmedMessage = trimNewlines(message);
 		std::string lowerMessage = toLowerCase(trimmedMessage);
-		if (lowerMessage == "quit") {
-			exitWithLog(EXIT_SUCCESS);
-		}
-		// TODO: authenticate, encrypton, encryptoff, rshon, rshoff...
+		if (lowerMessage == "quit") exitWithLog(EXIT_SUCCESS);
 		logger.log(LogLevel::LOG, "[%s] %s", client->getFullAddress().c_str(),
 				   trimmedMessage.c_str());
 	}
