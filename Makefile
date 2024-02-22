@@ -12,7 +12,7 @@ ifeq ($(DEBUG),true)
     LOG_FILE := /tmp/matt_daemon.log
 else
 	LOCK_FILE := /var/lock/matt_daemon.lock
-	LOG_FILE := /var/log/matt_daemon.log
+	LOG_FILE := /var/log/matt_daemon/matt_daemon.log
 endif
 
 SRCS := $(wildcard $(SRCS_DIR)*.cpp)

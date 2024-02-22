@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../includes/matt_daemon.hpp"
+#include <filesystem>
 #include <memory>
 
 enum LogLevel { INFO, LOG, ERROR };
@@ -8,8 +9,18 @@ enum LogLevel { INFO, LOG, ERROR };
 class Tintin_reporter {
 public:
 	Tintin_reporter(const std::string& filename) {
+		std::filesystem::path filePath(filename);
+		std::filesystem::path dirPath = filePath.parent_path();
+		if (!dirPath.empty() && !std::filesystem::exists(dirPath)) {
+			if (!std::filesystem::create_directories(dirPath)) {
+				fileError("create directory for", filename.c_str());
+			}
+		}
 		_file.open(filename, std::ios::out | std::ios::app);
-		if (!_file.is_open()) fileError("open", filename.c_str());
+		if (!_file.is_open()) {
+			if (getuid() == 0) fileError("open", filename.c_str());
+			else std::cerr << "The program needs to be run as root\n";
+		}
 	}
 
 	~Tintin_reporter() {

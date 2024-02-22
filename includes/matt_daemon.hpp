@@ -41,7 +41,7 @@
 #define LOG_FILE "/tmp/matt_daemon.log"
 #else
 #define LOCK_FILE "/var/lock/matt_daemon.lock"
-#define LOG_FILE "/var/log/matt_daemon.log"
+#define LOG_FILE "/var/log/matt_daemon/matt_daemon.log"
 #endif
 
 #define RESET "\033[0m"
