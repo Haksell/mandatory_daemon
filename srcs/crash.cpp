@@ -11,6 +11,11 @@ void cleanup() {
 	unlink(LOCK_FILE);
 }
 
+void exitWithLog(int returnValue) {
+	logger.log(LogLevel::INFO, "Stopping " DAEMON_NAME);
+	std::exit(returnValue);
+}
+
 void fileError(const char* action, const char* filename) {
 	std::cerr << RED << "Failed to " << action << " file " << filename << RESET
 			  << std::endl;
@@ -18,17 +23,17 @@ void fileError(const char* action, const char* filename) {
 	panic("Failed to open file %s", filename);
 }
 
-void syscall(int returnValue, const char* funcName) {
-	if (returnValue < 0) {
-		logger.log(LogLevel::ERROR, "%s: %s", funcName, strerror(errno));
-		std::exit(EXIT_FAILURE);
-	}
-}
-
 void panic(const char* format, ...) {
 	va_list args;
 	va_start(args, format);
 	logger.vlog(LogLevel::ERROR, format, args);
 	va_end(args);
-	std::exit(EXIT_FAILURE);
+	exitWithLog(EXIT_FAILURE);
+}
+
+void syscall(int returnValue, const char* funcName) {
+	if (returnValue < 0) {
+		logger.log(LogLevel::ERROR, "%s: %s", funcName, strerror(errno));
+		exitWithLog(EXIT_FAILURE);
+	}
 }

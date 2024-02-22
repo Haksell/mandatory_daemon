@@ -75,6 +75,7 @@ std::string toString(T x) {
 
 // crash.cpp
 void cleanup();
+void exitWithLog(int returnValue);
 void fileError(const char* action, const char* filename);
 void panic(const char* format, ...);
 void syscall(int returnValue, const char* funcName);

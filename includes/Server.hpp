@@ -138,8 +138,7 @@ private:
 		std::string trimmedMessage = trimNewlines(message);
 		std::string lowerMessage = toLowerCase(trimmedMessage);
 		if (lowerMessage == "quit") {
-			logger.log(LogLevel::INFO, "Stopping " DAEMON_NAME);
-			std::exit(EXIT_SUCCESS);
+			exitWithLog(EXIT_SUCCESS);
 		}
 		// TODO: authenticate, encrypton, encryptoff, rshon, rshoff...
 		logger.log(LogLevel::LOG, "[%s] %s", client->getFullAddress().c_str(),

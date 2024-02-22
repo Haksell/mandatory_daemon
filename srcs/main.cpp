@@ -56,8 +56,7 @@ static void logSignal(int sig) {
 
 static void handleRemainingSignals(int sig) {
 	logSignal(sig);
-	logger.log(LogLevel::INFO, "Stopping " DAEMON_NAME);
-	std::exit(EXIT_SUCCESS);
+	exitWithLog(EXIT_SUCCESS);
 }
 
 static void handleSIGCHLD(int sig) {
@@ -122,5 +121,5 @@ int main(void) {
 	} catch (const std::exception& e) {
 		logger.log(LogLevel::ERROR, "Unexpected exception: %s", e.what());
 	}
-	std::exit(EXIT_FAILURE);
+	exitWithLog(EXIT_FAILURE);
 }
