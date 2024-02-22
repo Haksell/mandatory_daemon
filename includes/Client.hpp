@@ -24,6 +24,10 @@ public:
 	const std::string& getFullAddress() const { return _fullAddress; }
 
 private:
+	Client();
+	Client(const Client& client);
+	Client& operator=(const Client& client);
+
 	int _clientSocket;
 	sockaddr_in _clientAddress;
 	std::string _fullAddress;

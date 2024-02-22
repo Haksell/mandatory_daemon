@@ -70,6 +70,10 @@ public:
 	static const size_t maxClients = 3;
 
 private:
+	Server();
+	Server(const Server& server);
+	Server& operator=(const Server& server);
+
 	int _serverSocket;
 	int _epollFd;
 	int _reuseAddr;

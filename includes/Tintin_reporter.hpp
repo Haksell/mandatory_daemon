@@ -43,5 +43,9 @@ public:
 	}
 
 private:
+	Tintin_reporter();
+	Tintin_reporter(const Tintin_reporter& tintin);
+	Tintin_reporter& operator=(const Tintin_reporter& tintin);
+
 	std::ofstream _file;
 };
