@@ -1,3 +1,6 @@
+# TODO: 1023 chars bug
+# TODO: pid file value
+
 NAME := Matt_daemon
 SRCS_DIR := srcs/
 OBJS_DIR := objs/
@@ -51,6 +54,13 @@ clean:
 
 kill:
 	sudo pkill -9 $(NAME) || true
+	sudo $(RM) $(LOCK_FILE) || true
+	sudo $(RM) $(LOG_FILE) || true
+	sudo $(RM) $(PID_FILE) || true
+	sudo $(RM) /tmp/matt_daemon* || true
+
+term:
+	sudo pkill -15 $(NAME) || true
 	sudo $(RM) $(LOCK_FILE) || true
 	sudo $(RM) $(LOG_FILE) || true
 	sudo $(RM) $(PID_FILE) || true
