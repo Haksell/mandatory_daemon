@@ -53,8 +53,8 @@
 #define DAEMON_NAME "Matt_daemon"
 #define SLEEP_INTERVAL 1000000
 
-#define BACKLOG 128
-#define MAX_CLIENTS 1024
+#define BACKLOG 8
+#define MAX_CLIENTS 8
 #define PORT 4242
 
 template <typename T>
