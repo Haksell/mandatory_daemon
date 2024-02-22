@@ -110,27 +110,32 @@ private:
 	void readFromClient(Client* client) {
 		static const size_t bufferSize = 1024;
 		char buffer[bufferSize] = {0};
-		int recvSize;
+		std::string message;
 
+		int recvSize;
 		do {
-			syscall(recvSize = recv(client->getSocket(), buffer, bufferSize - 1, 0),
-					"recv");
-			buffer[recvSize] = '\0';
-			client->_message += buffer;
+			recvSize = recv(client->getSocket(), buffer, bufferSize - 1, 0);
+			if (recvSize == -1) {
+				if (errno == EAGAIN || errno == EWOULDBLOCK) {
+					break;
+				} else {
+					syscall(recvSize, "recv");
+				}
+			} else if (recvSize > 0) {
+				buffer[recvSize] = '\0';
+				message += buffer;
+			}
 		} while (recvSize == bufferSize - 1);
 
-		if (client->_message.empty()) return removeClient(client);
+		if (message.empty()) return removeClient(client);
 
 		size_t pos;
-		while ((pos = client->_message.find("\n")) != std::string::npos) {
-			std::string line = client->_message.substr(0, pos);
-			client->_message = client->_message.substr(pos + 1);
+		while ((pos = message.find("\n")) != std::string::npos) {
+			std::string line = message.substr(0, pos);
+			message = message.substr(pos + 1);
 			handleMessage(client, line);
 		}
-		if (!client->_message.empty()) {
-			handleMessage(client, client->_message);
-			client->_message.clear();
-		}
+		if (!message.empty()) handleMessage(client, message);
 	}
 
 	void handleMessage(Client* client, const std::string& message) {
@@ -146,7 +151,6 @@ private:
 	}
 
 	void removeClient(Client* client) {
-		client->_message.clear();
 		epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->getSocket(), NULL);
 		close(client->getSocket());
 		for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end();

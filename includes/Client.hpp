@@ -23,8 +23,6 @@ public:
 
 	const std::string& getFullAddress() const { return _fullAddress; }
 
-	std::string _message;
-
 private:
 	int _clientSocket;
 	sockaddr_in _clientAddress;

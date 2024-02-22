@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../includes/matt_daemon.hpp"
+#include <memory>
 
 enum LogLevel { INFO, LOG, ERROR };
 
@@ -16,16 +17,18 @@ public:
 	}
 
 	void vlog(LogLevel level, const char* format, va_list args) {
-		static const size_t bufferSize = 1024;
-		char buffer[bufferSize];
-		vsnprintf(buffer, bufferSize, format, args);
+		va_list args_copy;
+		va_copy(args_copy, args);
+		int needed = vsnprintf(nullptr, 0, format, args) + 1;
+		std::unique_ptr<char[]> buffer(new char[needed]);
+		vsnprintf(buffer.get(), needed, format, args_copy);
+		va_end(args_copy);
 		const char* levelStr = "";
 		switch (level) {
 			case INFO: levelStr = "INFO"; break;
 			case LOG: levelStr = "LOG"; break;
 			case ERROR: levelStr = "ERROR"; break;
 		}
-		// TODO: remove half of the lines when file too big
 		auto t = std::time(nullptr);
 		auto tm = *std::localtime(&t);
 		_file << "[" << std::put_time(&tm, "%d/%m/%Y - %H:%M:%S") << "] [" << levelStr
