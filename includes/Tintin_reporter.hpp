@@ -17,10 +17,7 @@ public:
 			}
 		}
 		_file.open(filename, std::ios::out | std::ios::app);
-		if (!_file.is_open()) {
-			if (getuid() == 0) fileError("open", filename.c_str());
-			else std::cerr << "The program needs to be run as root\n";
-		}
+		if (!_file.is_open()) fileError("open", filename.c_str());
 	}
 
 	~Tintin_reporter() {
