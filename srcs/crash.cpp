@@ -2,11 +2,8 @@
 
 extern Tintin_reporter logger;
 extern int fdLock;
-extern int fdPid;
 
 void cleanup() {
-	close(fdPid);
-	unlink(PID_FILE);
 	close(fdLock);
 	unlink(LOCK_FILE);
 }

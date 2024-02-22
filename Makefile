@@ -1,5 +1,4 @@
 # TODO: 1023 chars bug
-# TODO: pid file value
 
 NAME := Matt_daemon
 SRCS_DIR := srcs/
@@ -13,11 +12,9 @@ ifeq ($(DEBUG),true)
     CXXFLAGS += -DDEBUG
     LOCK_FILE := /tmp/matt_daemon.lock
     LOG_FILE := /tmp/matt_daemon.log
-    PID_FILE := /tmp/matt_daemon.pid
 else
 	LOCK_FILE := /var/lock/matt_daemon.lock
 	LOG_FILE := /var/log/matt_daemon.log
-	PID_FILE := /run/matt_daemon.pid
 endif
 
 SRCS := $(wildcard $(SRCS_DIR)*.cpp)
@@ -56,14 +53,12 @@ kill:
 	sudo pkill -9 $(NAME) || true
 	sudo $(RM) $(LOCK_FILE) || true
 	sudo $(RM) $(LOG_FILE) || true
-	sudo $(RM) $(PID_FILE) || true
 	sudo $(RM) /tmp/matt_daemon* || true
 
 term:
 	sudo pkill -15 $(NAME) || true
 	sudo $(RM) $(LOCK_FILE) || true
 	sudo $(RM) $(LOG_FILE) || true
-	sudo $(RM) $(PID_FILE) || true
 	sudo $(RM) /tmp/matt_daemon* || true
 
 fclean: clean kill
@@ -90,7 +85,6 @@ info:
 	@ps aux | grep '[M]att_daemon' || true
 	@ls -lah $(LOCK_FILE) || true
 	@ls -lah $(LOG_FILE) || true
-	@ls -lah $(PID_FILE) || true
 
 logs:
 	@sudo tail -f $(LOG_FILE)

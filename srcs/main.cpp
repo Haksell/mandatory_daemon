@@ -3,7 +3,6 @@
 Tintin_reporter logger(LOG_FILE);
 Server server(PORT);
 int fdLock = -1;
-int fdPid = -1;
 
 static void becomeChild() {
 	pid_t pid = fork();
@@ -23,15 +22,6 @@ static int createLockFile(const char* filename) {
 		close(fd);
 		fileError("lock", filename);
 	}
-	return fd;
-}
-
-static int createPidFile(const char* filename) {
-	static size_t bufferSize = 32;
-	int fd = createLockFile(filename);
-	char buf[bufferSize];
-	snprintf(buf, bufferSize, "%ld\n", (long)getpid());
-	write(fd, buf, strlen(buf));
 	return fd;
 }
 
@@ -112,7 +102,6 @@ static void daemonize() {
 int main(void) {
 	try {
 		fdLock = createLockFile(LOCK_FILE);
-		fdPid = createPidFile(PID_FILE);
 		if (!DEBUG) daemonize();
 		atexit(cleanup);
 		setupRemainingSignals();

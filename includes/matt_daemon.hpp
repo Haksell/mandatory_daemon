@@ -39,11 +39,9 @@
 
 #if DEBUG
 #define LOCK_FILE "/tmp/matt_daemon.lock"
-#define PID_FILE "/tmp/matt_daemon.pid"
 #define LOG_FILE "/tmp/matt_daemon.log"
 #else
 #define LOCK_FILE "/var/lock/matt_daemon.lock"
-#define PID_FILE "/run/matt_daemon.pid"
 #define LOG_FILE "/var/log/matt_daemon.log"
 #endif
 
